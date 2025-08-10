@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THE 3D-PRINCE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, #121212 0%, #1e1e1e 100%);
+            color: #ffffff;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .navbar {
+            background: rgba(30, 30, 30, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .navbar-brand {
+            color: #ff0000 !important;
+            font-weight: 900;
+            font-size: 2rem;
+            transition: color 0.3s ease;
+        }
+
+        .navbar-brand:hover {
+            color: #ff3333 !important;
+        }
+
+        .nav-link {
+            color: #ffffff !important;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: #ff0000 !important;
+        }
+
+        section {
+            display: none;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        section.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .card {
+            background: #282828;
+            border: none;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(255, 0, 0, 0.2);
+        }
+
+        .card-img-top {
+            height: 200px;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover .card-img-top {
+            transform: scale(1.05);
+        }
+
+        .form-control {
+            background: #333;
+            color: #fff;
+            border: 1px solid #444;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            background: #333;
+            color: #fff;
+            border-color: #ff0000;
+            box-shadow: 0 0 0 0.2rem rgba(255, 0, 0, 0.25);
+        }
+
+        .btn-primary {
+            background: linear-gradient(90deg, #ff0000, #cc0000);
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: background 0.3s ease, transform 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(90deg, #cc0000, #aa0000);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #444;
+            border: none;
+            border-radius: 8px;
+            transition: background 0.3s ease, transform 0.2s ease;
+        }
+
+        .btn-secondary:hover {
+            background: #555;
+            transform: translateY(-2px);
+        }
+
+        #productsList {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .product-size {
+            font-size: 0.9rem;
+            color: #bbb;
+        }
+
+        table {
+            background: #1e1e1e;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            color: #fff;
+            border-bottom: 1px solid #333;
+        }
+
+        #labelModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            justify-content: center;
+            align-items: center;
+            z-index: 1050;
+            backdrop-filter: blur(5px);
+        }
+
+        #labelModal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        #closeModal {
+            background: #ff0000;
+            border-radius: 8px;
+        }
+
+        #closeModal:hover {
+            background: #cc0000;
+        }
+
+        .hero {
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://source.unsplash.com/random/1920x1080?3d-printing');
+            background-size: cover;
+            background-position: center;
+            padding: 60px 20px;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            font-weight: 900;
+            color: #ff0000;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: #fff;
+        }
+
+        @media (max-width: 768px) {
+            #productsList {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <h1>THE 3D-PRINCE</h1>
+        <p>Craft Your World with Premium 3D Prints</p>
+    </div>
+
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand" href="#">THE 3D-PRINCE</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="#" onclick="showSection('products')">Products</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#" onclick="showSection('cart')">Cart</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#" onclick="logout()">Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 py-8">
+        <!-- Signup Section -->
+        <section id="signup" class="card p-6 mx-auto max-w-md">
+            <h2 class="text-2xl font-bold text-center mb-4">Sign Up</h2>
+            <input type="email" id="signupEmail" class="form-control mb-3" placeholder="Email" required>
+            <input type="password" id="signupPassword" class="form-control mb-3" placeholder="Password" required>
+            <button class="btn btn-primary w-full" onclick="handleSignup()">Sign Up</button>
+            <p class="text-center mt-3">Already have an account? <a href="#" onclick="showSection('login')" class="text-red-500 hover:text-red-400">Login</a></p>
+        </section>
+
+        <!-- Verification Section -->
+        <section id="verify" class="card p-6 mx-auto max-w-md">
+            <h2 class="text-2xl font-bold text-center mb-4">Verify Email</h2>
+            <p class="text-center mb-4">A verification code has been "sent" to your email (check alert).</p>
+            <input type="text" id="verifyCode" class="form-control mb-3" placeholder="Enter Code" required>
+            <button class="btn btn-primary w-full" onclick="handleVerify()">Verify</button>
+        </section>
+
+        <!-- Login Section -->
+        <section id="login" class="card p-6 mx-auto max-w-md">
+            <h2 class="text-2xl font-bold text-center mb-4">Login</h2>
+            <input type="email" id="loginEmail" class="form-control mb-3" placeholder="Email" required>
+            <input type="password" id="loginPassword" class="form-control mb-3" placeholder="Password" required>
+            <button class="btn btn-primary w-full" onclick="handleLogin()">Login</button>
+            <p class="text-center mt-3">No account? <a href="#" onclick="showSection('signup')" class="text-red-500 hover:text-red-400">Sign Up</a></p>
+        </section>
+
+        <!-- Products Section -->
+        <section id="products">
+            <h2 class="text-3xl font-bold text-center mb-6">Our Products</h2>
+            <input type="text" id="searchInput" class="form-control mb-6 max-w-lg mx-auto" placeholder="Search items" oninput="filterProducts()">
+            <div id="productsList"></div>
+            <div class="text-center mt-6">
+                <button class="btn btn-primary mr-2" onclick="showSection('cart')">View Cart</button>
+                <button class="btn btn-secondary" onclick="logout()">Logout</button>
+            </div>
+        </section>
+
+        <!-- Cart Section -->
+        <section id="cart">
+            <h2 class="text-3xl font-bold text-center mb-6">Your Cart</h2>
+            <div id="cartItems" class="mb-6"></div>
+            <p id="cartTotal" class="text-xl font-bold mb-4">Total: $0.00</p>
+            <h3 class="text-xl font-semibold mb-4">Shipping Details</h3>
+            <input type="text" id="shippingName" class="form-control mb-3" placeholder="Full Name" required>
+            <input type="text" id="shippingAddress" class="form-control mb-3" placeholder="Address" required>
+            <input type="text" id="shippingCity" class="form-control mb-3" placeholder="City" required>
+            <input type="text" id="shippingZip" class="form-control mb-3" placeholder="ZIP Code" required>
+            <div class="text-center">
+                <button class="btn btn-secondary mr-2" onclick="showSection('products')">Back to Products</button>
+                <button class="btn btn-primary mr-2" onclick="checkout()">Checkout with PayPal</button>
+                <button class="btn btn-secondary" onclick="logout()">Logout</button>
+            </div>
+        </section>
+
+        <!-- Admin Section (Orders Tab) -->
+        <section id="admin">
+            <h2 class="text-3xl font-bold text-center mb-6">Orders Tab</h2>
+            <table class="table table-dark table-striped w-full">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Shipping Details</th>
+                        <th>Items</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="ordersTableBody"></tbody>
+            </table>
+            <div class="text-center mt-6">
+                <button class="btn btn-secondary" onclick="logout()">Logout</button>
+            </div>
+        </section>
+    </div>
+
+    <!-- Modal for Shipping Label -->
+    <div id="labelModal" class="modal">
+        <div class="modal-content">
+            <canvas id="shippingLabel" width="400" height="200"></canvas>
+            <button id="closeModal" class="btn btn-primary mt-4" onclick="closeModal()">Close</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script>
+        let currentUser = null;
+        let verificationCode = null;
+        let tempEmail = null;
+        let tempPassword = null;
+        const adminEmail = 'ryandruzb@gmail.com';
+
+        const products = [
+            { id: 1, name: '3D Printed Dragon', price: 20, image: 'https://source.unsplash.com/random/200x300?3d-printed-dragon', size: 'Desk-sized (max 20cm height)' },
+            { id: 2, name: 'Custom Keychain', price: 5, image: 'https://source.unsplash.com/random/200x300?3d-printed-keychain', size: 'Desk-sized (max 5cm)' },
+            { id: 3, name: '3D Model Figure', price: 15, image: 'https://source.unsplash.com/random/200x300?3d-printed-figure', size: 'Desk-sized (max 15cm height)' },
+            { id: 4, name: 'Printed Vase', price: 25, image: 'https://source.unsplash.com/random/200x300?3d-printed-vase', size: 'Desk-sized (max 20cm height)' },
+            { id: 5, name: 'Toy Car', price: 10, image: 'https://source.unsplash.com/random/200x300?3d-printed-toy-car', size: 'Desk-sized (max 10cm length)' },
+            { id: 6, name: 'Phone Stand', price: 8, image: 'https://source.unsplash.com/random/200x300?3d-printed-phone-stand', size: 'Desk-sized (max 15cm)' },
+            { id: 7, name: 'Wall Art', price: 30, image: 'https://source.unsplash.com/random/200x300?3d-printed-wall-art', size: 'Desk-sized (max 25cm)' },
+            { id: 8, name: 'Jewelry Holder', price: 12, image: 'https://source.unsplash.com/random/200x300?3d-printed-jewelry-holder', size: 'Desk-sized (max 15cm height)' },
+            { id: 9, name: 'Desk Organizer', price: 18, image: 'https://source.unsplash.com/random/200x300?3d-printed-desk-organizer', size: 'Desk-sized (max 20cm)' },
+            { id: 10, name: 'Custom Mug', price: 14, image: 'https://source.unsplash.com/random/200x300?3d-printed-mug', size: 'Desk-sized (max 10cm height)' },
+            { id: 11, name: 'Black Pearl', price: 45, image: 'https://www.gambody.com/blog/wp-content/uploads/2021/01/Black-Pearl-3D-printed-model-by-Phillip-Damiano-and-Daniel-Novy.jpg', size: 'Desk-sized (max 25cm length)' },
+            { id: 12, name: 'Barad-dûr', price: 50, image: 'https://www.gambody.com/blog/wp-content/uploads/2021/01/Barad-dur-3D-printed-model-by-Zsikla-Gergely.jpg', size: 'Desk-sized (max 30cm height)' },
+            { id: 13, name: 'Death Star I', price: 35, image: 'https://www.gambody.com/blog/wp-content/uploads/2021/01/Death-Star-I-3D-printed-model-by-Denny-Mazzeo.jpg', size: 'Desk-sized (max 20cm diameter)' },
+            { id: 14, name: 'Normandy SR-2', price: 40, image: 'https://www.gambody.com/blog/wp-content/uploads/2021/01/Normandy-SR2-3D-printed-model-by-Ray-De-Castillo.jpg', size: 'Desk-sized (max 25cm length)' },
+            { id: 15, name: 'USS Enterprise NCC-1701-D', price: 42, image: 'https://www.gambody.com/blog/wp-content/uploads/2021/01/USS-Enterprise-NCC-1701-D-3D-printed-model-by-Kudret-Kahraman.jpg', size: 'Desk-sized (max 25cm length)' },
+            { id: 16, name: 'Titanic', price: 38, image: 'https://www.gambody.com/blog/wp-content/uploads/2021/01/Titanic-3D-printed-model-by-Zdenek-Jaros.jpg', size: 'Desk-sized (max 30cm length)' },
+            { id: 17, name: 'Space Battleship Yamato', price: 44, image: 'https://www.gambody.com/blog/wp-content/uploads/2021/01/Space-Battleship-Yamato-3D-printed-model-by-Ori-Imre.jpg', size: 'Desk-sized (max 25cm length)' },
+            { id: 18, name: 'Hogwarts Express', price: 36, image: 'https://www.gambody.com/blog/wp-content/uploads/2021/01/Hogwarts-Express-3D-printed-model-by-Alan-Ahumada.jpg', size: 'Desk-sized (max 20cm length)' },
+            { id: 19, name: 'Xenomorph Lurker', price: 28, image: 'https://www.gambody.com/blog/wp-content/uploads/2021/01/Xenomorph-Lurker-3D-printed-figure-by-Ian-Hanrahan.jpg', size: 'Desk-sized (max 20cm height)' },
+            { id: 20, name: 'MOOSE from CHAPPiE', price: 32, image: 'https://source.unsplash.com/random/200x300?3d-printed-moose-chappie', size: 'Desk-sized (max 25cm height)' },
+            { id: 21, name: '#3DBenchy', price: 5, image: 'https://source.unsplash.com/random/200x300?3d-printed-3dbenchy', size: 'Desk-sized (max 10cm)' },
+            { id: 22, name: 'Shoe Insole', price: 10, image: 'https://source.unsplash.com/random/200x300?3d-printed-shoe-insole', size: 'Desk-sized (max 20cm)' },
+            { id: 23, name: 'Egg White and Yolk Separator', price: 7, image: 'https://source.unsplash.com/random/200x300?3d-printed-egg-separator', size: 'Desk-sized (max 10cm)' },
+            { id: 24, name: 'Wheelchair Ramp', price: 15, image: 'https://source.unsplash.com/random/200x300?3d-printed-wheelchair-ramp', size: 'Desk-sized (max 20cm)' },
+            { id: 25, name: 'Whistles', price: 6, image: 'https://source.unsplash.com/random/200x300?3d-printed-whistle', size: 'Desk-sized (max 5cm)' },
+            { id: 26, name: 'Glasses Frame', price: 12, image: 'https://source.unsplash.com/random/200x300?3d-printed-glasses-frame', size: 'Desk-sized (max 15cm)' },
+            { id: 27, name: 'Book Accessories', price: 8, image: 'https://source.unsplash.com/random/200x300?3d-printed-book-accessories', size: 'Desk-sized (max 10cm)' },
+            { id: 28, name: 'Business Cards and Wallets', price: 9, image: 'https://source.unsplash.com/random/200x300?3d-printed-wallet', size: 'Desk-sized (max 10cm)' },
+            { id: 29, name: 'Exercise Dumbbell', price: 20, image: 'https://source.unsplash.com/random/200x300?3d-printed-dumbbell', size: 'Desk-sized (max 15cm)' },
+            { id: 30, name: 'Buckles', price: 4, image: 'https://source.unsplash.com/random/200x300?3d-printed-buckle', size: 'Desk-sized (max 5cm)' },
+            { id: 31, name: '3D Printed Tripod', price: 18, image: 'https://source.unsplash.com/random/200x300?3d-printed-tripod', size: 'Desk-sized (max 20cm)' },
+            { id: 32, name: 'Electric Coffee Maker with 3D Printed Parts', price: 25, image: 'https://source.unsplash.com/random/200x300?3d-printed-coffee-maker', size: 'Desk-sized (max 20cm height)' },
+            { id: 33, name: '3D Printed Telescope', price: 30, image: 'https://source.unsplash.com/random/200x300?3d-printed-telescope', size: 'Desk-sized (max 25cm)' },
+            { id: 34, name: 'Functioning Drone', price: 50, image: 'https://source.unsplash.com/random/200x300?3d-printed-drone', size: 'Desk-sized (max 20cm)' },
+            { id: 35, name: 'Loudspeaker iPhone Extension', price: 15, image: 'https://source.unsplash.com/random/200x300?3d-printed-loudspeaker', size: 'Desk-sized (max 15cm)' },
+            { id: 36, name: 'Faucet Water Saver', price: 10, image: 'https://source.unsplash.com/random/200x300?3d-printed-faucet', size: 'Desk-sized (max 10cm)' },
+            { id: 37, name: 'Johnny Silverhand', price: 22, image: 'https://source.unsplash.com/random/200x300?3d-printed-johnny-silverhand', size: 'Desk-sized (max 20cm height)' },
+            { id: 38, name: 'Paladin Judgement Armour', price: 40, image: 'https://source.unsplash.com/random/200x300?3d-printed-paladin-armour', size: 'Desk-sized (max 25cm height)' },
+            { id: 39, name: 'Merkava MK2 Tank Model', price: 35, image: 'https://source.unsplash.com/random/200x300?3d-printed-tank', size: 'Desk-sized (max 20cm length)' },
+            { id: 40, name: 'Ant-Man and the Wasp Diorama', price: 28, image: 'https://source.unsplash.com/random/200x300?3d-printed-ant-man', size: 'Desk-sized (max 20cm)' },
+            { id: 41, name: 'Iron Giant', price: 45, image: 'https://source.unsplash.com/random/200x300?3d-printed-iron-giant', size: 'Desk-sized (max 30cm height)' },
+            { id: 42, name: 'Gul’dan WoW Character', price: 25, image: 'https://source.unsplash.com/random/200x300?3d-printed-guldan', size: 'Desk-sized (max 20cm height)' },
+            { id: 43, name: 'Treebeard', price: 30, image: 'https://source.unsplash.com/random/200x300?3d-printed-treebeard', size: 'Desk-sized (max 25cm height)' },
+            { id: 44, name: 'Slave I Star Wars', price: 38, image: 'https://source.unsplash.com/random/200x300?3d-printed-slave-i', size: 'Desk-sized (max 20cm length)' },
+            { id: 45, name: 'Spider-Man Figurine', price: 20, image: 'https://source.unsplash.com/random/200x300?3d-printed-spider-man', size: 'Desk-sized (max 15cm height)' },
+            { id: 46, name: 'Aerith Final Fantasy', price: 25, image: 'https://source.unsplash.com/random/200x300?3d-printed-aerith', size: 'Desk-sized (max 20cm height)' },
+            { id: 47, name: 'Assassin Figurine', price: 22, image: 'https://source.unsplash.com/random/200x300?3d-printed-assassin', size: 'Desk-sized (max 20cm height)' },
+            { id: 48, name: 'TIE Interceptor Star Wars', price: 30, image: 'https://source.unsplash.com/random/200x300?3d-printed-tie-interceptor', size: 'Desk-sized (max 15cm length)' },
+            { id: 49, name: 'Droideka Droid', price: 28, image: 'https://source.unsplash.com/random/200x300?3d-printed-droideka', size: 'Desk-sized (max 15cm height)' },
+            { id: 50, name: 'Mad Max Fury Road War Rig Model', price: 40, image: 'https://source.unsplash.com/random/200x300?3d-printed-war-rig', size: 'Desk-sized (max 25cm length)' },
+            { id: 51, name: 'Dovahkiin', price: 25, image: 'https://source.unsplash.com/random/200x300?3d-printed-dovahkiin', size: 'Desk-sized (max 20cm height)' },
+            { id: 52, name: 'Rocket Raccoon', price: 18, image: 'https://source.unsplash.com/random/200x300?3d-printed-rocket-raccoon', size: 'Desk-sized (max 15cm height)' },
+            { id: 53, name: 'Aragorn, Lord of the Rings', price: 26, image: 'https://source.unsplash.com/random/200x300?3d-printed-aragorn', size: 'Desk-sized (max 20cm height)' },
+            { id: 54, name: 'Voltron Robot', price: 35, image: 'https://source.unsplash.com/random/200x300?3d-printed-voltron', size: 'Desk-sized (max 25cm height)' },
+            { id: 55, name: 'Godzilla', price: 40, image: 'https://source.unsplash.com/random/200x300?3d-printed-godzilla', size: 'Desk-sized (max 25cm height)' },
+            { id: 56, name: 'Freddy Krueger', price: 22, image: 'https://source.unsplash.com/random/200x300?3d-printed-freddy-krueger', size: 'Desk-sized (max 20cm height)' },
+            { id: 57, name: 'Master Chief Figure', price: 28, image: 'https://source.unsplash.com/random/200x300?3d-printed-master-chief', size: 'Desk-sized (max 20cm height)' },
+            { id: 58, name: 'Mad Cat Mech Model', price: 32, image: 'https://source.unsplash.com/random/200x300?3d-printed-mad-cat', size: 'Desk-sized (max 25cm height)' },
+            { id: 59, name: 'Illidan Stormrage Figure', price: 30, image: 'https://source.unsplash.com/random/200x300?3d-printed-illidan', size: 'Desk-sized (max 20cm height)' },
+            { id: 60, name: 'Diablo', price: 35, image: 'https://source.unsplash.com/random/200x300?3d-printed-diablo', size: 'Desk-sized (max 25cm height)' }
+        ];
+
+        // Load data from localStorage
+        function loadData(key, defaultValue = []) {
+            const data = localStorage.getItem(key);
+            return data ? JSON.parse(data) : defaultValue;
+        }
+
+        // Save data to localStorage
+        function saveData(key, data) {
+            localStorage.setItem(key, JSON.stringify(data));
+        }
+
+        // Show specific section
+        function showSection(sectionId) {
+            document.querySelectorAll('section').forEach(sec => sec.classList.remove('active'));
+            document.getElementById(sectionId).classList.add('active');
+            if (sectionId === 'products') loadProducts();
+            if (sectionId === 'cart') loadCart();
+            if (sectionId === 'admin') loadAdminOrders();
+        }
+
+        // Handle Signup
+        function handleSignup() {
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+
+            if (!email || !password) return alert('Please fill all fields');
+
+            let users = loadData('users');
+            if (users.find(u => u.email === email)) return alert('User already exists');
+
+            tempEmail = email;
+            tempPassword = password;
+            verificationCode = Math.floor(100000 + Math.random() * 900000);
+            alert(`Verification code: ${verificationCode}`);
+            showSection('verify');
+        }
+
+        // Handle Verification
+        function handleVerify() {
+            const code = document.getElementById('verifyCode').value;
+            if (code == verificationCode) {
+                let users = loadData('users');
+                users.push({ email: tempEmail, password: tempPassword, verified: true });
+                saveData('users', users);
+                alert('Verified! Please login.');
+                showSection('login');
+            } else {
+                alert('Invalid code');
+            }
+        }
+
+        // Handle Login
+        function handleLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            let users = loadData('users');
+            const user = users.find(u => u.email === email && u.password === password && u.verified);
+
+            if (user) {
+                currentUser = email;
+                if (email === adminEmail) {
+                    showSection('admin');
+                } else {
+                    showSection('products');
+                }
+            } else {
+                alert('Invalid credentials or not verified');
+            }
+        }
+
+        // Logout
+        function logout() {
+            currentUser = null;
+            showSection('login');
+        }
+
+        // Load Products
+        function loadProducts(query = '') {
+            const list = document.getElementById('productsList');
+            list.innerHTML = '';
+            const filtered = products.filter(p => p.name.toLowerCase().includes(query.toLowerCase()));
+            filtered.forEach(product => {
+                const card = document.createElement('div');
+                card.classList.add('card');
+                card.innerHTML = `
+                    <img src="${product.image}" class="card-img-top" alt="${product.name}">
+                    <div class="card-body p-4">
+                        <h5 class="card-title text-lg font-bold">${product.name}</h5>
+                        <p class="card-text text-red-500 font-semibold">$${product.price.toFixed(2)}</p>
+                        <p class="card-text product-size">${product.size}</p>
+                        <select class="form-control mb-3">
+                            <option value="Red">Red</option>
+                            <option value="Blue">Blue</option>
+                            <option value="Green">Green</option>
+                            <option value="Black">Black</option>
+                            <option value="White">White</option>
+                            <option value="Yellow">Yellow</option>
+                            <option value="Custom">Custom</option>
+                        </select>
+                        <button class="btn btn-primary w-full" onclick="addToCart(${product.id}, this.previousElementSibling.value)">Add to Cart</button>
+                    </div>
+                `;
+                list.appendChild(card);
+            });
+        }
+
+        // Filter Products
+        function filterProducts() {
+            const query = document.getElementById('searchInput').value;
+            loadProducts(query);
+        }
+
+        // Add to Cart
+        function addToCart(productId, color) {
+            const cartKey = `cart_${currentUser}`;
+            let cart = loadData(cartKey);
+            const product = products.find(p => p.id === productId);
+            const existing = cart.find(item => item.id === productId && item.color === color);
+            if (existing) {
+                existing.qty += 1;
+            } else {
+                cart.push({ id: product.id, name: product.name, price: product.price, qty: 1, color, size: product.size });
+            }
+            saveData(cartKey, cart);
+            alert('Added to cart!');
+        }
+
+        // Load Cart
+        function loadCart() {
+            const cartKey = `cart_${currentUser}`;
+            const cart = loadData(cartKey);
+            const itemsDiv = document.getElementById('cartItems');
+            itemsDiv.innerHTML = '';
+            let total = 0;
+            cart.forEach((item, index) => {
+                const row = document.createElement('div');
+                row.classList.add('flex', 'justify-between', 'items-center', 'mb-4', 'p-4', 'bg-gray-800', 'rounded-lg');
+                row.innerHTML = `
+                    <div>
+                        <strong class="text-lg">${item.name} (${item.color})</strong><br>
+                        <span class="text-red-500">$${item.price.toFixed(2)}</span> x 
+                        <input type="number" class="form-control inline-block w-16" min="1" value="${item.qty}" onchange="updateQty(${index}, this.value)">
+                        <br><small class="product-size">${item.size}</small>
+                    </div>
+                    <button class="btn btn-danger btn-sm" onclick="removeFromCart(${index})">Remove</button>
+                `;
+                itemsDiv.appendChild(row);
+                total += item.price * item.qty;
+            });
+            document.getElementById('cartTotal').textContent = `Total: $${total.toFixed(2)}`;
+        }
+
+        // Update Qty
+        function updateQty(index, qty) {
+            const cartKey = `cart_${currentUser}`;
+            let cart = loadData(cartKey);
+            cart[index].qty = parseInt(qty);
+            saveData(cartKey, cart);
+            loadCart();
+        }
+
+        // Remove from Cart
+        function removeFromCart(index) {
+            const cartKey = `cart_${currentUser}`;
+            let cart = loadData(cartKey);
+            cart.splice(index, 1);
+            saveData(cartKey, cart);
+            loadCart();
+        }
+
+        // Checkout
+        function checkout() {
+            const name = document.getElementById('shippingName').value;
+            const address = document.getElementById('shippingAddress').value;
+            const city = document.getElementById('shippingCity').value;
+            const zip = document.getElementById('shippingZip').value;
+
+            if (!name || !address || !city || !zip) return alert('Please fill shipping details');
+
+            const cartKey = `cart_${currentUser}`;
+            const cart = loadData(cartKey);
+            if (cart.length === 0) return alert('Cart is empty');
+
+            // Save temp order
+            const tempOrder = {
+                user: currentUser,
+                shipping: { name, address, city, zip },
+                items: cart
+            };
+            saveData('temp_order', tempOrder);
+
+            // Create PayPal form
+            const form = document.createElement('form');
+            form.action = 'https://www.paypal.com/cgi-bin/webscr';
+            form.method = 'post';
+            form.innerHTML = `
+                <input type="hidden" name="cmd" value="_cart">
+                <input type="hidden" name="upload" value="1">
+                <input type="hidden" name="business" value="${adminEmail}">
+                <input type="hidden" name="currency_code" value="USD">
+                <input type="hidden" name="return" value="${window.location.href}">
+            `;
+            cart.forEach((item, i) => {
+                const idx = i + 1;
+                form.innerHTML += `
+                    <input type="hidden" name="item_name_${idx}" value="${item.name} (${item.color}) - ${item.size}">
+                    <input type="hidden" name="amount_${idx}" value="${item.price.toFixed(2)}">
+                    <input type="hidden" name="quantity_${idx}" value="${item.qty}">
+                `;
+            });
+            document.body.appendChild(form);
+            form.submit();
+        }
+
+        // Load Admin Orders
+        function loadAdminOrders() {
+            const tbody = document.getElementById('ordersTableBody');
+            tbody.innerHTML = '';
+            const orders = loadData('orders');
+            orders.forEach((order, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${order.user}</td>
+                    <td>${order.shipping.name}, ${order.shipping.address}, ${order.shipping.city} ${order.shipping.zip}</td>
+                    <td>${order.items.map(i => `${i.name} (${i.color}) - ${i.size} x${i.qty}`).join('<br>')}</td>
+                    <td><button class="btn btn-primary btn-sm" onclick="viewLabel(${index})">View Label</button></td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // View Shipping Label
+        function viewLabel(index) {
+            const orders = loadData('orders');
+            const order = orders[index];
+
+            const canvas = document.getElementById('shippingLabel');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = '#000';
+            ctx.font = 'bold 16px Montserrat';
+            ctx.fillText('THE 3D-PRINCE Shipping Label', 10, 20);
+
+            ctx.font = '12px Montserrat';
+            ctx.fillText(`To: ${order.shipping.name}`, 10, 40);
+            ctx.fillText(`${order.shipping.address}`, 10, 55);
+            ctx.fillText(`${order.shipping.city} ${order.shipping.zip}`, 10, 70);
+
+            ctx.fillText('Items:', 10, 90);
+            order.items.forEach((item, i) => {
+                ctx.fillText(`${item.name} (${item.color}) - ${item.size} x ${item.qty}`, 10, 105 + i * 15);
+            });
+
+            document.getElementById('labelModal').classList.add('active');
+        }
+
+        // Close Modal
+        function closeModal() {
+            document.getElementById('labelModal').classList.remove('active');
+        }
+
+        // Check for payment success on load
+        function checkPaymentSuccess() {
+            if (window.location.search.includes('tx=')) {
+                const tempOrder = loadData('temp_order');
+                if (tempOrder) {
+                    let orders = loadData('orders');
+                    orders.push(tempOrder);
+                    saveData('orders', orders);
+                    localStorage.removeItem('temp_order');
+                    const cartKey = `cart_${currentUser}`;
+                    saveData(cartKey, []);
+                    alert('Payment successful! Order processed.');
+                    if (currentUser) {
+                        showSection('products');
+                    }
+                }
+            }
+        }
+
+        // Initial Setup
+        let users = loadData('users');
+        if (!users.find(u => u.email === adminEmail)) {
+            users.push({ email: adminEmail, password: 'admin123', verified: true });
+            saveData('users', users);
+        }
+
+        checkPaymentSuccess();
+        showSection('login');
+    </script>
+</body>
+</html>
